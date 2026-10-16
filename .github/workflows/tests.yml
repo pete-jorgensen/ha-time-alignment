@@ -1,0 +1,21 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      # The plugin pins the Home Assistant release the tests run against (0.13.372 is
+      # HA 2026.10.0); the protocol tests talk to a fake NTP server and a fake ptp4l
+      # over loopback, and skip the multicast one where the runner has no loopback route.
+      - run: pip install pytest-homeassistant-custom-component==0.13.372 ntplib==0.4.0
+      - run: python -m pytest -q

@@ -1,0 +1,152 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Network time alignment",
+        "description": "Watch how closely the clocks on your network agree.",
+        "data": {
+          "ntp_hosts": "NTP hosts",
+          "reference": "Reference host",
+          "tolerance_ms": "Tolerance (ms)",
+          "scan_interval": "Poll interval (s)",
+          "ptp_enabled": "Watch PTP",
+          "ptp_domain": "PTP domain",
+          "ptp_interface": "PTP interface address",
+          "ptp_tolerance_us": "PTP tolerance (µs)"
+        },
+        "data_description": {
+          "ntp_hosts": "One per line, or comma-separated. host or host:port. Any NTP server answers: chrony, ntpd, a router, a GPS time server.",
+          "reference": "The host every other clock is compared against — normally your best time source. Leave empty to compare against the median of the hosts.",
+          "tolerance_ms": "A host whose offset from the reference is larger than this, by more than the measurement can resolve (half of each round trip), is reported as a problem.",
+          "scan_interval": "How often every host is measured. A LAN host gets three queries 2 s apart, a public server one. At least 60 s: public NTP servers ask for no more than about one query a minute.",
+          "ptp_enabled": "Ask every PTP clock on the local segment for its state (IEEE 1588 management, as pmc does). Needs UDP port 320, so Home Assistant must run as root or with CAP_NET_BIND_SERVICE.",
+          "ptp_domain": "PTP clocks only answer requests for their own domain.",
+          "ptp_interface": "IPv4 address of the interface facing the PTP network. Leave empty for the default route.",
+          "ptp_tolerance_us": "A PTP slave further than this from its master is reported as a problem."
+        }
+      }
+    },
+    "error": {
+      "bad_host": "A host could not be read. Use host or host:port.",
+      "reference_not_a_host": "The reference must be one of the NTP hosts.",
+      "nothing_to_watch": "Add at least one NTP host, or turn on PTP."
+    },
+    "abort": {
+      "already_configured": "Already configured.",
+      "single_instance_allowed": "Already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Network time alignment",
+        "description": "Change what is watched. The integration reloads when you save.",
+        "data": {
+          "ntp_hosts": "NTP hosts",
+          "reference": "Reference host",
+          "tolerance_ms": "Tolerance (ms)",
+          "scan_interval": "Poll interval (s)",
+          "ptp_enabled": "Watch PTP",
+          "ptp_domain": "PTP domain",
+          "ptp_interface": "PTP interface address",
+          "ptp_tolerance_us": "PTP tolerance (µs)"
+        },
+        "data_description": {
+          "ntp_hosts": "One per line, or comma-separated. host or host:port. Any NTP server answers: chrony, ntpd, a router, a GPS time server.",
+          "reference": "The host every other clock is compared against — normally your best time source. Leave empty to compare against the median of the hosts.",
+          "tolerance_ms": "A host whose offset from the reference is larger than this, by more than the measurement can resolve (half of each round trip), is reported as a problem.",
+          "scan_interval": "How often every host is measured. A LAN host gets three queries 2 s apart, a public server one. At least 60 s: public NTP servers ask for no more than about one query a minute.",
+          "ptp_enabled": "Ask every PTP clock on the local segment for its state (IEEE 1588 management, as pmc does). Needs UDP port 320, so Home Assistant must run as root or with CAP_NET_BIND_SERVICE.",
+          "ptp_domain": "PTP clocks only answer requests for their own domain.",
+          "ptp_interface": "IPv4 address of the interface facing the PTP network. Leave empty for the default route.",
+          "ptp_tolerance_us": "A PTP slave further than this from its master is reported as a problem."
+        }
+      }
+    },
+    "error": {
+      "bad_host": "A host could not be read. Use host or host:port.",
+      "reference_not_a_host": "The reference must be one of the NTP hosts.",
+      "nothing_to_watch": "Add at least one NTP host, or turn on PTP."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "spread": {
+        "name": "Offset spread"
+      },
+      "worst_offset": {
+        "name": "Worst offset"
+      },
+      "ptp_clocks": {
+        "name": "PTP clocks seen"
+      },
+      "ptp_worst_offset": {
+        "name": "PTP worst offset"
+      },
+      "offset": {
+        "name": "Offset"
+      },
+      "offset_vs_reference": {
+        "name": "Offset from reference"
+      },
+      "round_trip": {
+        "name": "Round trip"
+      },
+      "root_distance": {
+        "name": "Root distance"
+      },
+      "stratum": {
+        "name": "Stratum"
+      },
+      "ntp_reference": {
+        "name": "Upstream reference"
+      },
+      "offset_from_master": {
+        "name": "Offset from master"
+      },
+      "mean_path_delay": {
+        "name": "Mean path delay"
+      },
+      "steps_removed": {
+        "name": "Steps removed"
+      },
+      "port_state": {
+        "name": "Port state",
+        "state": {
+          "initializing": "Initializing",
+          "faulty": "Faulty",
+          "disabled": "Disabled",
+          "listening": "Listening",
+          "pre_master": "Pre-master",
+          "master": "Master",
+          "passive": "Passive",
+          "uncalibrated": "Uncalibrated",
+          "slave": "Slave"
+        }
+      },
+      "grandmaster": {
+        "name": "Grandmaster"
+      },
+      "grandmaster_clock_class": {
+        "name": "Grandmaster clock class"
+      },
+      "local_offset": {
+        "name": "Home Assistant clock offset"
+      },
+      "hosts_with_problems": {
+        "name": "Hosts with problems"
+      }
+    },
+    "binary_sensor": {
+      "network_problem": {
+        "name": "Time problem"
+      },
+      "host_problem": {
+        "name": "Time problem"
+      },
+      "clock_problem": {
+        "name": "Time problem"
+      }
+    }
+  }
+}

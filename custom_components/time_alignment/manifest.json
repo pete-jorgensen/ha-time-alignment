@@ -1,0 +1,17 @@
+{
+  "domain": "time_alignment",
+  "name": "Time Alignment (NTP/PTP)",
+  "codeowners": [
+    "@pete-jorgensen"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/pete-jorgensen/ha-time-alignment",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/pete-jorgensen/ha-time-alignment/issues",
+  "requirements": [
+    "ntplib==0.4.0"
+  ],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}
