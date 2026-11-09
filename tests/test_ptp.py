@@ -213,6 +213,57 @@ def test_tlv_may_not_run_into_padding():
         ptp.parse_message(bytes(pkt) + b"\x00" * 4)
 
 
+def _set_length(pkt: bytes, length: int) -> bytes:
+    out = bytearray(pkt)
+    out[2:4] = length.to_bytes(2, "big")
+    return bytes(out)
+
+
+def test_short_declared_length_is_a_ptp_error():
+    pkt = response(ptp.MID_CURRENT_DATA_SET, current_ds(1, 0, 0), SLAVE + b"\x00\x01", 7)
+    for length in (0, 1, 33, 34, 47, 48, 53):
+        with pytest.raises(ptp.PtpError):
+            ptp.parse_message(_set_length(pkt, length))
+
+
+def test_tlv_running_past_the_end_is_a_ptp_error():
+    pkt = bytearray(
+        response(ptp.MID_CURRENT_DATA_SET, current_ds(1, 0, 0), SLAVE + b"\x00\x01", 7)
+    )
+    at = 34 + 14 + 2  # the TLV's length field
+    for tlv_len in (0, 1, 100, 0xFFFF):
+        pkt[at : at + 2] = tlv_len.to_bytes(2, "big")
+        with pytest.raises(ptp.PtpError):
+            ptp.parse_message(bytes(pkt))
+
+
+def test_error_tlv_cut_short_is_a_ptp_error():
+    tlv = bytes.fromhex("0002") + (8).to_bytes(2, "big") + bytes.fromhex("0002")
+    body = SRC + bytes([0, 0, 0x02, 0])
+    pkt = header(34 + len(body) + len(tlv), 3, GM + b"\x00\x01") + body + tlv
+    with pytest.raises(ptp.PtpError):
+        ptp.parse_message(pkt)
+
+
+def test_no_prefix_of_a_valid_packet_raises_anything_but_ptp_error():
+    valid = [
+        response(ptp.MID_CURRENT_DATA_SET, current_ds(1, 0, 0), SLAVE + b"\x00\x01", 7),
+        response(ptp.MID_TIME_STATUS_NP, time_status(5, True, GM), SLAVE + b"\x00\x01", 7),
+    ]
+    for pkt in valid:
+        for n in range(len(pkt) + 1):
+            try:
+                ptp.parse_message(pkt[:n])
+            except ptp.PtpError:
+                pass
+        # Same, with the declared length also cut to the prefix length.
+        for n in range(len(pkt) + 1):
+            try:
+                ptp.parse_message(_set_length(pkt[:n], n) if n >= 4 else pkt[:n])
+            except ptp.PtpError:
+                pass
+
+
 def test_boundary_clock_reports_its_slave_side():
     c = ptp.PtpClock("x", ports={
         1: {"port_number": 1, "port_state": "master"},

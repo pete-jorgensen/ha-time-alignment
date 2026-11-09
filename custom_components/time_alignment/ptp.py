@@ -159,6 +159,9 @@ def parse_message(packet: bytes) -> ManagementResponse | None:
         return None
     if length > len(packet):
         raise PtpError(f"truncated: header says {length} bytes, got {len(packet)}")
+    # A declared length shorter than the fixed parts would make the unpacks below fail.
+    if length < _HEADER.size + _MGMT.size + _TLV.size:
+        raise PtpError(f"declared length {length} is shorter than a management message")
     # Ethernet padding can follow the message; only the declared length is ours.
     packet = packet[:length]
     target, _start, _hops, action, _res = _MGMT.unpack_from(packet, _HEADER.size)
