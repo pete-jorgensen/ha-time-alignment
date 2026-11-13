@@ -150,8 +150,8 @@ class ManagementResponse:
 def parse_message(packet: bytes) -> ManagementResponse | None:
     """Decode a management RESPONSE. Anything else (our own looped-back GET, a Sync,
     an Announce) returns None rather than raising: the socket hears all of it."""
-    if len(packet) < _HEADER.size + _MGMT.size + _TLV.size:
-        return None
+    if len(packet) < _HEADER.size:
+        return None  # too short to say what it is: not ours to judge
     (tsmt, ver, length, domain, _r1, _flags, _corr, _r2, src, seq, _ctl, _lmi) = (
         _HEADER.unpack_from(packet, 0)
     )

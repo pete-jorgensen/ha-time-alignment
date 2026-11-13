@@ -264,6 +264,30 @@ def test_no_prefix_of_a_valid_packet_raises_anything_but_ptp_error():
                 pass
 
 
+def test_empty_and_header_only_packets_raise_nothing():
+    assert ptp.parse_message(b"") is None
+    pkt = response(ptp.MID_CURRENT_DATA_SET, current_ds(1, 0, 0), SLAVE + b"\x00\x01", 7)
+    assert ptp.parse_message(pkt[:10]) is None
+
+
+def test_short_packet_declaring_more_than_it_holds_is_a_ptp_error():
+    pkt = response(ptp.MID_CURRENT_DATA_SET, current_ds(1, 0, 0), SLAVE + b"\x00\x01", 7)
+    # A full header, then less than a management message, declaring a long message.
+    for n in (34, 40, 47):
+        with pytest.raises(ptp.PtpError):
+            ptp.parse_message(pkt[:n])
+
+
+def test_datagram_received_survives_malformed_packets():
+    pkt = response(ptp.MID_CURRENT_DATA_SET, current_ds(1, 0, 0), SLAVE + b"\x00\x01", 7)
+    collector = ptp._Collector({7}, SRC)
+    for bad in (b"", pkt[:10], pkt[:40], pkt[:-4], _set_length(pkt, 20)):
+        collector.datagram_received(bad, ("192.0.2.9", 320))
+    assert collector.responses == []
+    collector.datagram_received(pkt, ("192.0.2.9", 320))
+    assert len(collector.responses) == 1
+
+
 def test_boundary_clock_reports_its_slave_side():
     c = ptp.PtpClock("x", ports={
         1: {"port_number": 1, "port_state": "master"},
